@@ -6,6 +6,10 @@
   "type": "commonjs",
   "keywords": [],
   "author": "Isai Jair Ruiz Marin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jair3008/ExcelFileHandle.git"
+  },
   "license": "ISC",
   "dependencies": {
     "xlsx-populate": "^1.21.0"
