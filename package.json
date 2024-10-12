@@ -1,0 +1,13 @@
+{
+  "name": "excel_handle",
+  "version": "0.0.1",
+  "description": "This is an excel handle that have many methods for handle .xlsx files",
+  "main": "index.js",
+  "type": "commonjs",
+  "keywords": [],
+  "author": "Isai Jair Ruiz Marin",
+  "license": "ISC",
+  "dependencies": {
+    "xlsx-populate": "^1.21.0"
+  }
+}
