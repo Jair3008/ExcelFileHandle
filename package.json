@@ -1,6 +1,6 @@
 {
   "name": "excel_handle",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "This is an excel handle that have many methods for handle .xlsx files",
   "main": "index.js",
   "type": "commonjs",
