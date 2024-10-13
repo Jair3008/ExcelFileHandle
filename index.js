@@ -93,6 +93,69 @@ const writeToExcel = async (path = '', sheetNumber = 0 , value = [], config = {
             }
         }
     }
+    // Si el usuario digita un rango de filas en vertical
+    if (config.vertical){
+        if (config.range) {
+            // If the user wants inset only an value
+            if (config.range.length > 0 && Array.isArray(value) == false) {
+                console.log('only an value in specific cell');
+                await excel.sheet(sheetNumber).cell(config.cell.toUpperCase()).value(value);
+            }
+            if (config.range.length > 0 && Array.isArray(value) == true) {
+                console.log('multiples values in a specific range (Vertical)');
+                const array = config.range.split(':');
+                let startRow, endRow, col;
+                // get the column char
+                col = array[0].split('');
+                let newCol = col.map((e) => {
+                    if (isNaN(e)) {
+                        return e;
+                    }
+                    else {
+                        return '';
+                    }
+                })
+                newCol = newCol.join('')
+                startRow = array[0].split('').map((e) => {
+                    if (!isNaN(e)) {
+                        return e;
+                    }
+                    else {
+                        return '';
+                    }
+                })
+                startRow = parseInt(startRow.join(''), 10);
+                endRow = array[1].split('').map((e) => {
+                    if (!isNaN(e)) {
+                        return e;
+                    }
+                    else {
+                        return '';
+                    }
+                })
+                endRow = parseInt(endRow.join(''), 10);
+                // console.log(newCol, startRow, endRow);
+                let j = 0;
+                for (let i = 0; i < endRow; i++) {
+                    
+                    if (j >= value.length) {
+                        j = 0;
+                        console.log(j);
+                        
+                        await excel.sheet(sheetNumber).row(startRow).cell(newCol).value(value[j]);
+                        startRow++;
+                        j++;
+                    }
+                    else {
+                        console.log(j);
+                        await excel.sheet(sheetNumber).row(startRow).cell(newCol).value(value[j]);
+                        startRow++;
+                        j++;
+                    }
+                }
+            }
+        }
+    }
 
     if (!config.vertical){
         if (config.range){
@@ -109,4 +172,6 @@ const writeToExcel = async (path = '', sheetNumber = 0 , value = [], config = {
 
 }
 
-writeToExcel('./test.xlsx', 0, ["hola3", "queso3", 'barret', 'monsta'], {cell: "B1", vertical: true});
+// writeToExcel('./test.xlsx', 0, ["hola3", "queso3", 'mango', 'pepino'], {range: 'B1:B10', vertical: true});
+
+module.exports = { writeToExcel }
