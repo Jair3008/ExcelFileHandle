@@ -1,5 +1,5 @@
 const isaiX = require('../index.js');
 
-const values = ["1", "2", "3"];
+const values = ["5", "2", "3"];
 
-isaiX.WriteToExcel('../test.xlsx', 0, 'F2', 'F10', values);
+isaiX.WriteToExcel('../test.xlsx', 0, 'A1', 'A3', values, false);

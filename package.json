@@ -1,5 +1,5 @@
 {
-  "name": "excel_handle",
+  "name": "isai_xlsx",
   "version": "0.0.1",
   "description": "This is an excel handle that have many methods for handle .xlsx files",
   "main": "index.js",

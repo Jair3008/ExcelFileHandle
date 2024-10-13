@@ -1,143 +1,112 @@
-const XLSX = require('xlsx-populate');
+const xlsx = require('xlsx-populate');
 
-// Get the value of a specific cell of Excel
-const getSingleCellValue = async (path = '', sheetNumber = Number, col = '', row = '') => {
+const writeToExcel = async (path = '', sheetNumber = 0 , value = [], config = {
+    vertical: false, // Default horizontal
+    range: '', // If you need write in multiples cells
+    cell: '' // If you need write in single cell
+}) => {
 
-    const data = await XLSX.fromFileAsync(path);
-
-    const res = await data.sheet(sheetNumber).cell(`${col}${row}`).value();
-
-    console.log(res);
-
-    return res;
-
-}
-
-// Set a value in a specific cell of Excel
-const setSingleCellValue = async (path = '', sheetNumber = Number, col = '', row = '', value = '') => {
-
-    const data = await XLSX.fromFileAsync(path);
-
-    const res = await data.sheet(sheetNumber).cell(`${col}${row}`).value(value);
-    
-    data.toFileAsync(path);
-
-    console.log('value writed');    
-
-}
-
-// Get multiple cell values from Excel
-const getMultipleCellValue = async (path = '', sheetNumber = Number, startCell = '', endCell = '') => {
-
-    const data = await XLSX.fromFileAsync(path);
-
-    const res = await data.sheet(sheetNumber).range(`${startCell}:${endCell}`).value();
-
-    console.log(res);
-    
-    return res;
-
-}
-
-// Set multiple cell values
-const SetMultipleCellValue = async (path = '', sheetNumber = Number, startCell = '', endCell = '', copyCell = '', values = []) => {
-
-    const value = [values];
-
-    const data = await XLSX.fromFileAsync(path);
-
-    if (startCell && endCell && copyCell == null) {
-        const res = await data.sheet(sheetNumber).cell(`${startCell}:${endCell}`).value(value);
-    }
-
-    if (copyCell) {
-        const res = await data.sheet(sheetNumber).cell(copyCell).value(value);
-    }
-
-    data.toFileAsync(path);
-
-    console.log('values writed');
-
-}
-
-// Copy multiple cell values
-const CopyMultipleCellValue = async (path = '', sheetNumber = Number, startCell = '', endCell = '', copyCell = '') => {
-
-    const values = await getMultipleCellValue(path, 0, startCell, endCell);
-
-    const data = await XLSX.fromFileAsync(path);
-
-    const res = await data.sheet(sheetNumber).cell(copyCell).value(values);
-
-    data.toFileAsync(path);
-
-    console.log('values writed');
-
-}
-
-////////////////////////////////////////////////////////
-
-/**
- * 
- * WriteToExcel(A1,A20)
-WriteToExcel(A1, F1)
-WriteToExcel(A1, V) te escribe desde A1 hasta infinito a lo vertical
-WriteToExcel (A1, H)
-Te escribe desde A1 hasta lo infinito en lo horizontal
- * 
- */
-
-const WriteToExcel = async (path = '', sheetNumber = Number , startCell = '', endCell = '', value = [], horizontal = true) => {
-    
-    try {
-        
-        // Formatting the VALUE array
-        const values = [value];
-
-        // Get the data from ALL Excel
-        const data = await XLSX.fromFileAsync(path);
-
-        if (startCell && endCell) {
-            // Set the data in specific RANGE position
-            await data.sheet(sheetNumber).range(`${startCell}:${endCell}`).value(values);
-        }
-        else if (startCell && endCell == null) {
-            // Set the data in specific position to infinite (horizontal default)
-            if (horizontal == true) {
-                await data.sheet(sheetNumber).cell(startCell).value(values);
-            }
-            else {
-                const verticalArray = value.map(item => [item]);
-                await data.sheet(sheetNumber).cell(startCell).value(verticalArray);
-            }
-        }
-        else {
-            console.error('An error has happened: ', error);
+    // If config values aren't string type
+    if (config.cell) {
+        if (typeof (config.cell) !== 'string') {
+            console.error('cagaste hubo un error 2');
             return {
-                res: "bad"
+                res: 'error'
             }
         }
-
-        data.toFileAsync(path);
-
-        console.log('Values writed');
-        
-        return {
-            res: 'ok'
-        }
-
-    } catch (error) {
-        
-        console.error('An error has happened: ', error);
-
-        return {
-            res: error
-        }
-
     }
+
+    if (config.range) {
+        if (typeof (config.range) !== 'string') {
+            console.error('cagaste hubo un error 2');
+            return {
+                res: 'error'
+            }
+        }
+    }
+
+    // If the value parameter no exist or is null
+    if (!value || value.length <= 0) {
+        console.error('cagaste hubo un error 2');
+        return {
+            res: 'error'
+        }
+    }
+
+    // If the user has selected two configs not supported
+    if (config.cell && config.range) {
+        if (config.range.length > 0 && config.cell.length > 0) {
+            console.error('cagaste hubo un error 3');
+            return {
+                res: 'error'
+            }
+        }
+    }
+
+    ///////////////////////////////////////////
+
+    const excel = await xlsx.fromFileAsync(path);
+
+    if (!config.vertical){
+        if (config.cell) {
+            // If the user wants inset only an value
+            if (config.cell.length > 0 && Array.isArray(value) == false) {
+                console.log('only an value in specific cell');
+                await excel.sheet(sheetNumber).cell(config.cell.toUpperCase()).value(value);
+            }
+            if (config.cell.length > 0 && Array.isArray(value) == true) {
+                console.log('multiples values in a specific cell');
+                await excel.sheet(sheetNumber).cell(config.cell.toUpperCase()).value([value]);
+            }
+        }
+    }
+
+    if (config.vertical){
+        if (config.cell) {
+            // If the user wants inset only an value
+            if (config.cell.length > 0 && Array.isArray(value) == false) {
+                console.log('only an value in specific cell');
+                await excel.sheet(sheetNumber).cell(config.cell.toUpperCase()).value(value);
+            }
+            if (config.cell.length > 0 && Array.isArray(value) == true) {
+                console.log('multiples values in a specific cell (Vertical)');
+                const array = config.cell.split('');
+                var row = array.map((e) => {
+                    if (!isNaN(e)){
+                        return e;
+                    }
+                })
+                row = parseInt(row.join(''), 10);
+                var col = array.map((el) => {
+                    if (isNaN(el)){
+                        return el;
+                    }
+                    else{
+                        return '';
+                    }
+                })
+                col = col.join('');
+                // console.log(row, col);
+                for (let i = 0; i < value.length; i++) {
+                    await excel.sheet(sheetNumber).row(row++).cell(col).value(value[i]);
+                }                
+            }
+        }
+    }
+
+    if (!config.vertical){
+        if (config.range){
+            // If the user wants inset in array an value
+            if (config.range.length > 0 && Array.isArray(value) == true) {
+                console.log('multiples value in specific range'); 
+                console.log(value);
+                await excel.sheet(sheetNumber).range(config.range.toUpperCase()).value([value]);
+            }
+        }
+    }
+
+    excel.toFileAsync(path);
 
 }
 
-////////////////////////////////////////////////////////
-
-module.exports = { getMultipleCellValue, CopyMultipleCellValue, SetMultipleCellValue, getSingleCellValue, setSingleCellValue, WriteToExcel }
+writeToExcel('./test.xlsx', 0, ["hola3", "queso3", 'barret', 'monsta'], {cell: "B1", vertical: true});
